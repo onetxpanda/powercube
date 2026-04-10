@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "powercube"
+version = "1.0.0"
+description = "Python client library for the Segway PowerCube BLE API"
+requires-python = ">=3.11"
+dependencies = [
+    "bleak>=0.21.0",
+    "cryptography>=41.0",
+]
+
+[project.optional-dependencies]
+cli = ["rich>=13.0"]
+
+[project.scripts]
+powercube = "powercube.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["powercube*"]
