@@ -229,6 +229,30 @@ class PowerCube:
         else:
             logger.info("Device is unpaired — call pair() to set a password.")
 
+    async def _handshake_with_client(self, client: BleakClient) -> None:
+        """
+        Run the encrypted handshake on an already-connected BleakClient.
+
+        Use this when the caller manages the BLE connection (e.g. via
+        bleak_retry_connector) and hands off the connected client.
+        """
+        self._client = client
+        await self._client.start_notify(NOTIFY_UUID, self._on_notify)
+        device_has_pwd = await self._do_pre_comm()
+        mkey_pwd = self.get_credential()
+        if mkey_pwd:
+            await self._do_auth(mkey_pwd)
+            self._auth_done = True
+            logger.info("Authenticated. COMM mode active.")
+        elif device_has_pwd:
+            logger.warning(
+                "Device has a stored password but we have no credentials. "
+                "The device is already paired (possibly by another app). "
+                "Factory-reset the device to clear the stored password."
+            )
+        else:
+            logger.info("Device is unpaired — call pair() to set a password.")
+
     async def disconnect(self) -> None:
         if self._client and self._client.is_connected:
             await self._client.stop_notify(NOTIFY_UUID)
